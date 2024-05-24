@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "parking",
+    "slug": "parking",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "myapp",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.thisisloi.parking"
+    },
+    "android": {
+      "package": "com.thisisloi.parking"
+    },
+    "plugins": ["expo-localization"],
+    "extra": {
+      "eas": {
+        "projectId": "04879b7b-bad1-4fc4-98c0-67d8a507fceb"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/04879b7b-bad1-4fc4-98c0-67d8a507fceb"
+    }
+  }
+}
