@@ -56,13 +56,15 @@ const SignIn = (props: Props) => {
         userActions.login({
           username: values.phoneNumber,
           password: values.password,
-        })
+        }),
       ).unwrap();
       setIsLoading(false);
-      if (result.errorMessage) {
-        Alert.alert("Error: " + result.errorMessage);
+
+      if (result.error) {
+        Alert.alert(`${result.error}`);
         return;
       }
+
       if (isRemember) {
         await AsyncStorage.setItem("phoneNumber", values.phoneNumber);
         await AsyncStorage.setItem("password", values.password);
