@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "parking",
-    "slug": "parking",
+    "name": "parking-merchant",
+    "slug": "parking-merchant",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
