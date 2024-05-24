@@ -1,49 +1,31 @@
-import { StatusBar } from "expo-status-bar";
-import { Keyboard, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import { View } from "react-native";
-import Map from "@src/components/Home/Map";
-import DetailModal from "@src/components/Home/DetailModal";
-import { useState } from "react";
-import { useAppDispatch } from "@src/store/hooks";
-import { bookingActions } from "@src/store/slices/bookingSlice";
+import AppButton from "@src/components/common/AppButton";
+import { Colors } from "@src/constants";
+import {
+  Keyboard,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-const HomeScreen = ({ navigation }: { navigation: any }) => {
-  const [isShowDetail, setIsShowDetail] = useState(false);
-  const [distance, setDistance] = useState(0);
+interface IProps {
+  navigation: NativeStackNavigationProp<any, any>;
+}
 
-  const dispatch = useAppDispatch();
-
-  const navigateBooking = () => {
-    setIsShowDetail(false);
-    navigation.navigate("ParkingDetailsScreen");
-  };
-
+const HomeScreen = (props: IProps) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
-        <StatusBar style="dark" />
-        <Map
-          onSelectedMarker={(p: ParkingLot) => {
-            dispatch(
-              bookingActions.update({
-                field: "parkingLot",
-                value: p,
-              }),
-            );
-            setIsShowDetail(true);
-          }}
-          setDistance={(d: number) => {
-            setDistance(d);
-          }}
-        />
-
-        <DetailModal
-          isShow={isShowDetail}
-          onClose={() => setIsShowDetail(false)}
-          distance={distance}
-          navigateBooking={navigateBooking}
-        />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <AppButton
+          style={styles.btnQRCode}
+          onPress={() => console.log("go to qr code screen")}
+        >
+          <Text style={{ color: "#CCCCCC", fontSize: 20, fontWeight: "600" }}>
+            QR Code
+          </Text>
+        </AppButton>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 };
@@ -51,7 +33,17 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 0,
-    flex: 1,
+    marginTop: 10,
+    height: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnQRCode: {
+    padding: 8,
+    width: "45%",
+    backgroundColor: Colors.light.primary,
+    color: Colors.light.text,
   },
 });
