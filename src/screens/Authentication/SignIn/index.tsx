@@ -3,8 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AppButton from "@src/components/common/AppButton";
 import { Colors } from "@src/constants";
 import { useAppDispatch } from "@src/store/hooks";
-import { userActions } from "@src/store/slices/userSlice";
-import { StatusBar } from "expo-status-bar";
 import { Formik, FormikProps } from "formik";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -14,19 +12,19 @@ import {
   Switch,
   Text,
   TextInput,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NavigationProp } from "@react-navigation/native";
 import * as Yup from "yup";
+import { AuthAction } from "@src/store/slices/authSlice";
 
 type Props = {
   navigation: NavigationProp<any, any>;
 };
 type LoginValue = {
-  phoneNumber: string;
+  email: string;
   password: string;
 };
 
@@ -38,10 +36,9 @@ const SignIn = (props: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const LoginSchema = Yup.object().shape({
-    phoneNumber: Yup.string()
-      .matches(new RegExp("^0"), "Invalid phone number")
-      .required("Please enter phone number!")
-      .length(10, "Phone number must include 10 numbers")
+    email: Yup.string()
+      .required("Please enter email!")
+      .email("Email invalid!")
       .nullable(),
     password: Yup.string().required("Please enter password").nullable(),
   });
@@ -53,55 +50,56 @@ const SignIn = (props: Props) => {
     try {
       setIsLoading(true);
       const result = await dispatch(
-        userActions.login({
-          username: values.phoneNumber,
+        AuthAction.login({
+          email: values.email,
           password: values.password,
         }),
       ).unwrap();
-      setIsLoading(false);
 
+      setIsLoading(false);
+      console.log(result);
       if (result.error) {
         Alert.alert(`${result.error}`);
         return;
       }
 
       if (isRemember) {
-        await AsyncStorage.setItem("phoneNumber", values.phoneNumber);
+        await AsyncStorage.setItem("email", values.email);
         await AsyncStorage.setItem("password", values.password);
-        await AsyncStorage.setItem("idUser", result.id);
       } else {
-        await AsyncStorage.removeItem("phoneNumber");
+        await AsyncStorage.removeItem("email");
         await AsyncStorage.removeItem("password");
-        await AsyncStorage.removeItem("idUser");
       }
       props.navigation.navigate("App");
     } catch (error: any) {
       setIsLoading(false);
-      Alert.alert("Error: " + error);
+
+      console.log(error);
+      Alert.alert("Incorrect email or password");
     }
   };
 
   useEffect(() => {
     const saveIntoAsyncStorage = async () => {
       if (formikRef.current) {
-        const phoneNumber = await AsyncStorage.getItem("phoneNumber");
+        const email = await AsyncStorage.getItem("email");
         const password = await AsyncStorage.getItem("password");
-        formikRef.current.setFieldValue("phoneNumber", phoneNumber);
+        formikRef.current.setFieldValue("email", email);
         formikRef.current.setFieldValue("password", password);
       }
     };
     saveIntoAsyncStorage();
   }, [formikRef]);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
         <View style={{ height: "20%", justifyContent: "center" }}>
           <Text style={styles.title}>Sign in</Text>
         </View>
         <Formik
           innerRef={formikRef}
-          initialValues={{ phoneNumber: "", password: "" }}
+          initialValues={{ email: "", password: "" }}
           validationSchema={LoginSchema}
           onSubmit={(values) => login(values)}
         >
@@ -115,19 +113,15 @@ const SignIn = (props: Props) => {
                     color={Colors.light.text}
                   />
                   <TextInput
-                    placeholder="Phone number"
-                    placeholderTextColor="#CBD5E1"
-                    onChangeText={handleChange("phoneNumber")}
-                    value={values.phoneNumber}
-                    keyboardType="number-pad"
+                    placeholder="parking@gmail.com"
+                    onChangeText={handleChange("email")}
+                    value={values.email}
                     style={styles.input}
                   />
                   <View style={{ width: 22 }} />
                 </View>
-                {errors.phoneNumber && touched.phoneNumber && (
-                  <Text style={styles.validateError}>
-                    * {errors.phoneNumber}
-                  </Text>
+                {errors.email && touched.email && (
+                  <Text style={styles.validateError}>* {errors.email}</Text>
                 )}
                 <View style={styles.groupInput}>
                   <MaterialCommunityIcons
@@ -137,14 +131,13 @@ const SignIn = (props: Props) => {
                   />
                   <TextInput
                     placeholder="Password"
-                    placeholderTextColor="#CBD5E1"
                     onChangeText={handleChange("password")}
                     value={values.password}
                     style={styles.input}
                     secureTextEntry={hidePassword}
                   />
                   <Octicons
-                    name={hidePassword ? "eye" : "eye-closed"}
+                    name={hidePassword ? "eye-closed" : "eye"}
                     size={22}
                     color={Colors.light.text}
                     onPress={() => setHidePassword(!hidePassword)}
@@ -160,7 +153,7 @@ const SignIn = (props: Props) => {
                   flexDirection: "row",
                   width: "100%",
                   alignItems: "center",
-                  marginTop: 20,
+                  marginTop: 10,
                   marginBottom: 20,
                 }}
               >
@@ -182,22 +175,6 @@ const SignIn = (props: Props) => {
                 >
                   Remember me
                 </Text>
-                <TouchableOpacity
-                  style={{ flex: 1 }}
-                  onPress={() => {
-                    props.navigation.navigate("ResetPassword");
-                  }}
-                >
-                  <Text
-                    style={{
-                      textAlign: "right",
-                      color: Colors.light.text,
-                      fontWeight: "700",
-                    }}
-                  >
-                    Forgot password?
-                  </Text>
-                </TouchableOpacity>
               </View>
               <AppButton
                 style={styles.btnSignIn}
@@ -210,37 +187,6 @@ const SignIn = (props: Props) => {
                   Sign in
                 </Text>
               </AppButton>
-              <View style={styles.oauth}>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    marginTop: 15,
-                    marginBottom: 10,
-                  }}
-                >
-                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    Don't have an account?
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      props.navigation.navigate("SignUp");
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: Colors.light.primary,
-                        fontSize: 16,
-                        fontWeight: "800",
-                        marginLeft: 10,
-                      }}
-                    >
-                      Sign up
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
             </View>
           )}
         </Formik>
@@ -260,7 +206,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingLeft: 50,
     paddingRight: 50,
-    paddingTop: 90,
+    paddingTop: 50,
     backgroundColor: Colors.light.background,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
@@ -293,7 +239,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   btnSignIn: {
-    marginTop: 70,
     height: 50,
     width: "100%",
     justifyContent: "center",
@@ -303,23 +248,6 @@ const styles = StyleSheet.create({
     paddingLeft: 0,
     marginLeft: 0,
     marginTop: 5,
-  },
-  oauth: {
-    width: "100%",
-    marginTop: 20,
-  },
-  btnOauth: {
-    backgroundColor: "#FFF",
-    color: Colors.light.text,
-    display: "flex",
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 50,
-    marginTop: 10,
-  },
-  iconOauth: {
-    marginRight: 10,
   },
   validateError: {
     color: "red",

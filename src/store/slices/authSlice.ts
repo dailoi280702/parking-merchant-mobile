@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { login } from "../actions/authAction";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type AuthState = Partial<{
-  auth: Company;
+  auth: any;
   loading: boolean;
   error: any;
 }>;
@@ -28,6 +29,7 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, { payload }) => {
         state.loading = false;
+        AsyncStorage.setItem("idUser", payload.data.id);
         state.auth = payload.data;
       })
       .addCase(login.rejected, (state, { payload }) => {

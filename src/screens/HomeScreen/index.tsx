@@ -8,12 +8,18 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface IProps {
   navigation: NativeStackNavigationProp<any, any>;
 }
 
-const HomeScreen = (props: IProps) => {
+const HomeScreen = ({ navigation }: IProps) => {
+  const logOut = async () => {
+    await AsyncStorage.removeItem("idUser");
+    navigation.navigate("SignIn");
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.container}>
@@ -21,8 +27,14 @@ const HomeScreen = (props: IProps) => {
           style={styles.btnQRCode}
           onPress={() => console.log("go to qr code screen")}
         >
-          <Text style={{ color: "#CCCCCC", fontSize: 20, fontWeight: "600" }}>
-            QR Code
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "600" }}>
+            Scan a ticket
+          </Text>
+        </AppButton>
+
+        <AppButton style={styles.btnQRCode} onPress={logOut}>
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "600" }}>
+            Log out
           </Text>
         </AppButton>
       </SafeAreaView>
@@ -33,10 +45,10 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
     height: "100%",
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
+    gap: 20,
     justifyContent: "center",
     alignItems: "center",
   },

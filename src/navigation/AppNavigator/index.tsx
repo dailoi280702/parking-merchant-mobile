@@ -44,6 +44,9 @@ const AppNavigator = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
           component={NotFoundScreen}
           options={{ title: "Oops!" }}
         />
+        {isRememberedAccount && (
+          <Stack.Screen name="SignIn" component={SignIn} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

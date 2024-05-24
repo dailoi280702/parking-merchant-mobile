@@ -1,19 +1,9 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Colors } from "@src/constants";
 import useColorScheme from "@src/hooks/useColorScheme";
-import {
-  HomeIcon,
-  TicketIcon,
-  UserCircleIcon,
-} from "react-native-heroicons/outline";
-import {
-  HomeIcon as HomeIconSolid,
-  TicketIcon as TicketIconSolid,
-  UserCircleIcon as UserCircleIconSolid,
-} from "react-native-heroicons/solid";
-import BookingHistoryStack from "../Stack/BookingHistoryStack";
+import { HomeIcon } from "react-native-heroicons/outline";
+import { HomeIcon as HomeIconSolid } from "react-native-heroicons/solid";
 import HomeStack from "../Stack/HomeStack";
-import ProfileStack from "../Stack/ProfileStack";
 import { AppTabParams } from "./types";
 
 const Tab = createBottomTabNavigator<AppTabParams>();
@@ -40,30 +30,6 @@ const AppTabNavigator = () => {
               <HomeIconSolid color={color} />
             ) : (
               <HomeIcon color={color} />
-            ),
-        }}
-      />
-      <Tab.Screen
-        name="History"
-        component={BookingHistoryStack}
-        options={{
-          tabBarIcon: ({ color, focused }: any) =>
-            focused ? (
-              <TicketIconSolid color={color} />
-            ) : (
-              <TicketIcon color={color} />
-            ),
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          tabBarIcon: ({ color, focused }: any) =>
-            focused ? (
-              <UserCircleIconSolid color={color} />
-            ) : (
-              <UserCircleIcon color={color} />
             ),
         }}
       />

@@ -93,3 +93,14 @@ type Location = {
   latitude: number;
   longitude: number;
 };
+
+type Employee = {
+  id?: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  companyID: string;
+  status: string;
+  startShiftTime: any;
+  endShiftTime: any;
+};
