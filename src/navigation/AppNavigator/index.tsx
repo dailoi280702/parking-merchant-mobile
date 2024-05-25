@@ -13,6 +13,7 @@ import AppTabNavigator from "../AppTabNavigator";
 import LinkingConfiguration from "../LinkingConfiguration";
 import SignIn from "@src/screens/Authentication/SignIn";
 import QRCode from "@src/screens/QRCode";
+import ParkingReservationDetail from "@src/screens/ReverseParkingScreen";
 
 const Stack = createNativeStackNavigator<AppStackParams>();
 
@@ -42,6 +43,7 @@ const AppNavigator = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="App" component={AppTabNavigator} />
         <Stack.Screen name="QRCode" component={QRCode} />
+        <Stack.Screen name="Reservation" component={ParkingReservationDetail} />
         <Stack.Screen
           name="NotFound"
           component={NotFoundScreen}

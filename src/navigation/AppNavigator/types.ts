@@ -1,28 +1,12 @@
-interface IResetPasswordParams {
-  verificationId: string;
-  type: string;
-  phoneNumber: string;
-}
-
-interface ISignUpParams {
-  phoneNumber: string;
-  type: string;
-  user: User;
-}
-
-interface IVerificationParams {
-  phoneNumber: string;
-  type: string;
+interface IReservationParams {
+  ticketId: string;
 }
 
 export type AppStackParams = {
   Home: {};
   QRCode: {};
-  SignIn: undefined;
-  SignUp: ISignUpParams;
-  ResetPassword: IResetPasswordParams;
-  Verification: IVerificationParams;
-  App: undefined;
-  NotFound: undefined;
-  ChangePassword: any;
+  SignIn: {};
+  App: {};
+  NotFound: {};
+  Reservation: IReservationParams;
 };

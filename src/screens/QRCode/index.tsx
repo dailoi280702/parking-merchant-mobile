@@ -8,16 +8,15 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { BarCodeScanningResult } from "expo-camera/build/legacy/Camera.types";
 import AppButton from "@src/components/common/AppButton";
+import { AppStackParams } from "@src/navigation/AppNavigator/types";
 
-interface IProps {
-  navigation: NativeStackNavigationProp<any, any>;
-}
+type Props = NativeStackScreenProps<AppStackParams, "QRCode">;
 
-const QRCode = (props: IProps) => {
+const QRCode = (props: Props) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
@@ -29,8 +28,8 @@ const QRCode = (props: IProps) => {
     if (data.slice(0, 7) !== "parking") {
       Alert.alert("Invalid QR code!");
     } else {
-      const idTicket = data.slice(7, data.length);
-      console.log(idTicket);
+      const ticketId = data.slice(7, data.length);
+      props.navigation.navigate("Reservation", { ticketId });
     }
     setScanned(true);
   };

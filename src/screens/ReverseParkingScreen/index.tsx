@@ -1,223 +1,205 @@
-import { Feather } from "@expo/vector-icons";
 import AppButton from "@src/components/common/AppButton";
 import { Colors } from "@src/constants";
-import { useAppDispatch, useAppSelector } from "@src/store/hooks";
-import { selectBooking, selectTimeFrames } from "@src/store/selectors";
-import { bookingActions } from "@src/store/slices/bookingSlice";
-import { ColorHelper, CurrencyHelper, DateTimeHelper } from "@src/utils";
+import { CurrencyHelper, DateTimeHelper } from "@src/utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import { timeFrameActions } from "@src/store/slices/timeFrameSlice";
-import SelectableTimeItem from "@src/components/Booking/SelectableTimeItem";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AppStackParams } from "@src/navigation/AppNavigator/types";
+import { ticketApi } from "@src/api";
+import { Spinner } from "@nghinv/react-native-loading";
+import { Images } from "@src/assets";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-const minuteInterval = 10;
+type Props = NativeStackScreenProps<AppStackParams, "Reservation">;
 
-const ReserveParkingScreen = ({ navigation }: any) => {
-  const [isDateVisible, setDateVisible] = useState<boolean>(false);
-  const [isTimeVisible, setTimeVisible] = useState<boolean>(false);
-  const dispatch = useAppDispatch();
-  const bookingState = useAppSelector(selectBooking);
-  const timeFrames = useAppSelector(selectTimeFrames);
-  const timeFramesValid = useAppSelector((state) => state.timeFrame.valid);
-
-  const handleConfirmDate = (date: Date) => {
-    dispatch(bookingActions.update({ field: "bookingDate", value: date }));
-    setDateVisible(false);
-  };
-
-  const handleConfirmTime = (time: Date) => {
-    const openTime = dayjs(bookingState.parkingLot.startTime);
-    const openTimeToMinute = openTime.hour() * 60 + openTime.minute();
-    const closeTime = dayjs(bookingState.parkingLot.endTime);
-    const closeTimeToMinute = closeTime.hour() * 60 + closeTime.minute();
-    const now = time.getHours() * 60 + time.getMinutes();
-    if (now < openTimeToMinute || now >= closeTimeToMinute) {
-      Alert.alert("Please select a start time within operating hours!");
-      return;
-    }
-    var bookingDate = new Date(
-      bookingState.bookingDate.getFullYear(),
-      bookingState.bookingDate.getMonth(),
-      bookingState.bookingDate.getDate(),
-    );
-    const startTime = dayjs(bookingDate)
-      .add(time.getHours(), "hour")
-      .add(time.getMinutes(), "minute")
-      .toDate();
-
-    if (dayjs(startTime).isSameOrBefore(new Date())) {
-      Alert.alert("Can't select previous time");
-      return;
-    }
-    dispatch(bookingActions.update({ field: "startTime", value: startTime }));
-    setTimeVisible(false);
-  };
-
-  const onSelectTimeFrame = (timeFrame: TimeFrame) => {
-    dispatch(bookingActions.update({ field: "timeFrame", value: timeFrame }));
-  };
-
-  useEffect(() => {
-    var listTimeFrameValid = timeFrames.filter((element) => {
-      const start = dayjs(bookingState.startTime);
-      const startToMinute = start.hour() * 60 + start.minute();
-      const openTime = dayjs(bookingState.parkingLot.startTime);
-      const openTimeToMinute = openTime.hour() * 60 + openTime.minute();
-      const closeTime = dayjs(bookingState.parkingLot.endTime);
-      const closeTimeToMinute = closeTime.hour() * 60 + closeTime.minute();
-      return (
-        startToMinute + element.duration >= openTimeToMinute &&
-        startToMinute + element.duration <= closeTimeToMinute &&
-        element.duration <= closeTimeToMinute - openTimeToMinute
-      );
-    });
-    if (listTimeFrameValid.length <= 0) {
-      Alert.alert(
-        "Sorry, there is no available time frame for you. \nSee you later!",
-      );
-    }
-    dispatch(timeFrameActions.updateValid(listTimeFrameValid));
-  }, [bookingState.startTime]);
-
-  const navigateNext = () => {
-    if (
-      bookingState.bookingDate &&
-      bookingState.startTime &&
-      bookingState.timeFrame
-    ) {
-      var bookingDate = new Date(
-        bookingState.bookingDate.getFullYear(),
-        bookingState.bookingDate.getMonth(),
-        bookingState.bookingDate.getDate(),
-      );
-      const startTime = dayjs(bookingDate)
-        .add(bookingState.startTime.getHours(), "hour")
-        .add(bookingState.startTime.getMinutes(), "minute")
-        .toDate();
-      dispatch(bookingActions.update({ field: "startTime", value: startTime }));
-      const endTime = dayjs(startTime)
-        .add(bookingState.timeFrame.duration, "minutes")
-        .toDate();
-      dispatch(bookingActions.update({ field: "endTime", value: endTime }));
-      navigation.navigate("SelectParkingSlotScreen");
-    } else {
-      Alert.alert("You must select booking time!");
-    }
-  };
-
+const Item = ({ title, value }: { title: string; value: string }) => {
   return (
-    <View style={{ flex: 1, paddingHorizontal: 20 }}>
-      <ScrollView
-        style={{ paddingVertical: 10 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>Start time</Text>
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
-          <TouchableOpacity
-            style={styles.dateContainer}
-            onPress={() => setDateVisible(true)}
-          >
-            <Text style={styles.date}>
-              {DateTimeHelper.formatDate(bookingState.bookingDate)}
-            </Text>
-            <Feather name="calendar" size={20} color={Colors.light.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.dateContainer, { marginLeft: 12 }]}
-            onPress={() => setTimeVisible(true)}
-          >
-            <Text style={styles.date}>
-              {DateTimeHelper.formatTime(bookingState.startTime)}
-            </Text>
-            <Feather name="clock" size={20} color={Colors.light.text} />
-          </TouchableOpacity>
-        </View>
-        <DateTimePickerModal
-          date={bookingState.bookingDate}
-          isVisible={isDateVisible}
-          mode="date"
-          minimumDate={new Date()}
-          onConfirm={handleConfirmDate}
-          onCancel={() => setDateVisible(false)}
-        />
-        <DateTimePickerModal
-          date={bookingState.startTime}
-          isVisible={isTimeVisible}
-          mode="time"
-          is24Hour
-          minuteInterval={minuteInterval}
-          onConfirm={handleConfirmTime}
-          onCancel={() => setTimeVisible(false)}
-        />
-        <Text style={styles.title}>Duration</Text>
-        <FlatList
-          data={timeFramesValid}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <SelectableTimeItem
-              item={item}
-              selectedId={bookingState?.timeFrame?.id}
-              onSelect={() => onSelectTimeFrame(item)}
-            />
-          )}
-        />
-        <Text style={styles.title}>Total</Text>
-        <Text style={styles.total}>
-          {CurrencyHelper.formatVND(bookingState.timeFrame?.cost) || "0₫"}
-        </Text>
-      </ScrollView>
-      <AppButton style={styles.continueButton} onPress={navigateNext}>
-        <Text style={styles.countinueText}>Countinue</Text>
-      </AppButton>
+    <View style={styles.flexRow}>
+      <Text style={[styles.title, { marginRight: 4 }]}>{title}</Text>
+      <Text style={styles.value}>{value}</Text>
     </View>
   );
 };
 
-export default ReserveParkingScreen;
+const ParkingReservationDetail = (props: Props) => {
+  const [reservation, setReservation] = useState<Ticket>(null);
+  const routeData = props.route.params;
+  const checkIn = async (ticketId: string) => {};
+
+  const checkOut = async (ticketId: string) => {};
+
+  const procedure = () => {
+    if (reservation.state == "new") {
+      checkIn(reservation.id);
+    } else if ((reservation.state = "ongoing")) {
+      checkOut(reservation.id);
+    } else {
+      Alert.alert("Ticket is expired");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await ticketApi.getOneWithExtend(routeData.ticketId);
+        console.log(res);
+
+        if (!res.data) {
+          Alert.alert(`${res}`);
+          props.navigation.goBack();
+          return;
+        }
+
+        const data = res.data;
+        setReservation(data);
+        if (data.state == "completed" || data.state == "cancel") {
+          Alert.alert("QR code expired!");
+          Spinner.hide();
+          if (props.navigation.canGoBack()) {
+            props.navigation.goBack();
+          }
+        }
+      } catch (error) {
+        console.log(error);
+        Alert.alert(JSON.stringify(error));
+        props.navigation.goBack();
+      } finally {
+        Spinner.hide();
+      }
+    })();
+  }, []);
+
+  return (
+    <>
+      {!reservation && Spinner.show()}
+      {reservation && (
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.headerText}>Parking ticket</Text>
+            <View style={styles.card}>
+              <Item
+                title={"Parking area"}
+                value={reservation?.parkingLot.name}
+              />
+              <Item title={"Address"} value={reservation?.parkingLot.address} />
+              <Item
+                title={"Vehicle"}
+                value={`${reservation?.vehicle?.name} (${reservation?.vehicle?.number})`}
+              />
+              <Item
+                title={"Parking spot"}
+                value={`${reservation?.parkingSlot.block.code} - ${reservation?.parkingSlot?.name}`}
+              />
+              <Item
+                title={"Date"}
+                value={DateTimeHelper.formatDate(reservation?.startTime)}
+              />
+              <Item
+                title={"Duration"}
+                value={DateTimeHelper.convertToHour(
+                  reservation?.timeFrame?.duration,
+                )}
+              />
+              <Item
+                title={"Hours"}
+                value={
+                  dayjs(reservation?.startTime).format("HH:mm") +
+                  " - " +
+                  dayjs(reservation?.endTime).format("HH:mm")
+                }
+              />
+            </View>
+            <View style={styles.card}>
+              <Item
+                title={"Amount"}
+                value={CurrencyHelper.formatVND(reservation?.timeFrame?.cost)}
+              />
+              <Text style={styles.dash} ellipsizeMode="clip" numberOfLines={1}>
+                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                - - - - - - - - - - - - - - - - - - - - - -
+              </Text>
+              <Item
+                title={"Total"}
+                value={CurrencyHelper.formatVND(reservation?.timeFrame?.cost)}
+              />
+            </View>
+            <View
+              style={[
+                styles.card,
+                styles.flexRow,
+                { alignItems: "center", marginBottom: 60 },
+              ]}
+            >
+              <Image source={Images.Money} style={styles.image} />
+              <View style={styles.wrapper}>
+                <Text style={styles.cash} numberOfLines={2}>
+                  Cash
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+          <AppButton style={styles.continueButton} onPress={procedure}>
+            <Text style={styles.countinueText}>
+              {reservation?.state == "new"
+                ? "Check in"
+                : reservation?.state == "ongoing"
+                  ? "Check out"
+                  : ""}
+            </Text>
+          </AppButton>
+        </SafeAreaView>
+      )}
+    </>
+  );
+};
+
+export default ParkingReservationDetail;
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginVertical: 12,
-    color: Colors.light.heading,
+  header: {
+    marginTop: 40,
+    textAlign: "center",
   },
-  dateContainer: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+  card: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: Colors.light.background,
+    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+    shadowColor: "#6F7EC9",
+    shadowOffset: {
+      width: -1,
+      height: -1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+  },
+  flexRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: ColorHelper.hexToRgbA(Colors.light.subtitle, 0.1),
-    borderRadius: 6,
+    alignItems: "flex-start",
+    marginVertical: 8,
   },
-  date: { fontSize: 16, color: Colors.light.text },
-  total: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: Colors.light.primary,
+  title: { fontSize: 15, fontWeight: "500", color: Colors.light.subtitle },
+  value: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.light.text,
     textAlign: "right",
+    flex: 1,
   },
+  dash: { color: Colors.light.subtitle },
+  image: { width: 34, height: 34, marginVertical: 8 },
+  wrapper: { flex: 1, marginHorizontal: 16 },
   continueButton: {
-    marginTop: 12,
+    marginVertical: 12,
     position: "absolute",
     bottom: 10,
     right: 20,
@@ -227,5 +209,12 @@ const styles = StyleSheet.create({
     color: Colors.light.background,
     fontSize: 18,
     fontWeight: "600",
+  },
+  cash: { fontSize: 18, fontWeight: "600", color: Colors.light.text },
+  headerText: {
+    fontSize: 20,
+    color: Colors.light.primary,
+    fontWeight: "700",
+    textAlign: "center",
   },
 });

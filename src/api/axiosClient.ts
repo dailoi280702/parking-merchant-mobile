@@ -6,7 +6,7 @@ import Config from "@src/config";
 const c = () => {
   console.log(Config);
   return axios.create({
-    baseURL: Config.API_BASE_URL,
+    baseURL: Config.API_BASE_URL + "/api/v1",
     headers: {
       "Content-Type": "application/json",
     },
