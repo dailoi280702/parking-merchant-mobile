@@ -1,5 +1,4 @@
 export type AppTabParams = {
-  Home: undefined;
-  History: undefined;
-  Profile: undefined;
+  Scan: undefined;
+  QRCode: undefined;
 };

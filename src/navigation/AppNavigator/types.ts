@@ -17,6 +17,7 @@ interface IVerificationParams {
 
 export type AppStackParams = {
   Home: {};
+  QRCode: {};
   SignIn: undefined;
   SignUp: ISignUpParams;
   ResetPassword: IResetPasswordParams;

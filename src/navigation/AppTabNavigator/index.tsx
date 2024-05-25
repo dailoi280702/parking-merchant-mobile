@@ -1,10 +1,14 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Colors } from "@src/constants";
 import useColorScheme from "@src/hooks/useColorScheme";
-import { HomeIcon } from "react-native-heroicons/outline";
-import { HomeIcon as HomeIconSolid } from "react-native-heroicons/solid";
+import { HomeIcon, QrCodeIcon } from "react-native-heroicons/outline";
+import {
+  HomeIcon as HomeIconSolid,
+  QrCodeIcon as QrCodeIconSolid,
+} from "react-native-heroicons/solid";
 import HomeStack from "../Stack/HomeStack";
 import { AppTabParams } from "./types";
+import QRCode from "@src/screens/QRCode";
 
 const Tab = createBottomTabNavigator<AppTabParams>();
 
@@ -30,6 +34,18 @@ const AppTabNavigator = () => {
               <HomeIconSolid color={color} />
             ) : (
               <HomeIcon color={color} />
+            ),
+        }}
+      />
+      <Tab.Screen
+        name="Scan"
+        component={QRCode}
+        options={{
+          tabBarIcon: ({ color, focused }: any) =>
+            focused ? (
+              <QrCodeIcon color={color} />
+            ) : (
+              <QrCodeIconSolid color={color} />
             ),
         }}
       />

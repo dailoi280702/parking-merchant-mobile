@@ -12,6 +12,7 @@ import { AppStackParams } from "./types";
 import AppTabNavigator from "../AppTabNavigator";
 import LinkingConfiguration from "../LinkingConfiguration";
 import SignIn from "@src/screens/Authentication/SignIn";
+import QRCode from "@src/screens/QRCode";
 
 const Stack = createNativeStackNavigator<AppStackParams>();
 
@@ -34,19 +35,18 @@ const AppNavigator = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
       linking={LinkingConfiguration}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isRememberedAccount && (
-          <Stack.Screen name="SignIn" component={SignIn} />
-        )}
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName={!isRememberedAccount ? "SignIn" : "App"}
+      >
+        <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="App" component={AppTabNavigator} />
+        <Stack.Screen name="QRCode" component={QRCode} />
         <Stack.Screen
           name="NotFound"
           component={NotFoundScreen}
           options={{ title: "Oops!" }}
         />
-        {isRememberedAccount && (
-          <Stack.Screen name="SignIn" component={SignIn} />
-        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

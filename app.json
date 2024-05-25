@@ -18,7 +18,15 @@
     "android": {
       "package": "com.thisisloi.parking"
     },
-    "plugins": ["expo-localization"],
+    "plugins": [
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Parking merchant app to access your camera"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "04879b7b-bad1-4fc4-98c0-67d8a507fceb"
