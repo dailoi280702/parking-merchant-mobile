@@ -30,11 +30,47 @@ const Item = ({ title, value }: { title: string; value: string }) => {
 const ParkingReservationDetail = (props: Props) => {
   const [reservation, setReservation] = useState<Ticket>(null);
   const routeData = props.route.params;
-  const checkIn = async (ticketId: string) => {};
 
-  const checkOut = async (ticketId: string) => {};
+  const checkOut = async (idTicket: string) => {
+    try {
+      const lateTime = dayjs(reservation.endTime)
+        .add(10, "minute")
+        .isBefore(new Date());
+      const isCheckOut = await ticketApi.procedure(idTicket, "check_out");
+      if (lateTime && isCheckOut.data.data) {
+        Alert.alert("You are late!");
+      }
+      if (isCheckOut.data.data) {
+        Alert.alert("Check out successfully!");
+        props.navigation.navigate("App");
+      } else {
+        Alert.alert("Error!");
+        props.navigation.goBack();
+      }
+    } catch (error) {
+      Alert.alert("Fail");
+      props.navigation.goBack();
+    }
+  };
+
+  const checkIn = async (idTicket: string) => {
+    try {
+      const res = await ticketApi.procedure(idTicket, "check_in");
+      if (res.data.data) {
+        Alert.alert("Check in successfully!");
+        props.navigation.navigate("App");
+      } else {
+        Alert.alert(`${res.data.message}`);
+        props.navigation.goBack();
+      }
+    } catch (error) {
+      Alert.alert("Fail");
+      props.navigation.goBack();
+    }
+  };
 
   const procedure = () => {
+    console.log(`${reservation.state}`);
     if (reservation.state == "new") {
       checkIn(reservation.id);
     } else if ((reservation.state = "ongoing")) {
