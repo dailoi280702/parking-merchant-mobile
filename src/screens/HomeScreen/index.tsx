@@ -25,7 +25,7 @@ const HomeScreen = ({ navigation }: IProps) => {
       <SafeAreaView style={styles.container}>
         <AppButton
           style={styles.btnQRCode}
-          onPress={() => console.log("go to qr code screen")}
+          onPress={() => navigation.navigate("QRCode")}
         >
           <Text style={{ color: "white", fontSize: 20, fontWeight: "600" }}>
             Scan a ticket

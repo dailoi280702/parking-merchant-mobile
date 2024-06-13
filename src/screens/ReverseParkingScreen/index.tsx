@@ -12,6 +12,7 @@ import { ticketApi } from "@src/api";
 import { Spinner } from "@nghinv/react-native-loading";
 import { Images } from "@src/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { FlatList } from "react-native-gesture-handler";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -115,7 +116,7 @@ const ParkingReservationDetail = (props: Props) => {
     <>
       {!reservation && Spinner.show()}
       {reservation && (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, paddingBottom: 20 }}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.headerText}>Parking ticket</Text>
             <View style={styles.card}>
@@ -137,12 +138,6 @@ const ParkingReservationDetail = (props: Props) => {
                 value={DateTimeHelper.formatDate(reservation?.startTime)}
               />
               <Item
-                title={"Duration"}
-                value={DateTimeHelper.convertToHour(
-                  reservation?.timeFrame?.duration,
-                )}
-              />
-              <Item
                 title={"Hours"}
                 value={
                   dayjs(reservation?.startTime).format("HH:mm") +
@@ -150,19 +145,50 @@ const ParkingReservationDetail = (props: Props) => {
                   dayjs(reservation?.endTime).format("HH:mm")
                 }
               />
-            </View>
-            <View style={styles.card}>
-              <Item
-                title={"Amount"}
-                value={CurrencyHelper.formatVND(reservation?.timeFrame?.cost)}
-              />
+              <FlatList
+                data={reservation.ticketExtend}
+                keyExtractor={(data) => data.id}
+                renderItem={({ item }) => (
+                  <>
+                    <Text
+                      style={styles.dash}
+                      ellipsizeMode="clip"
+                      numberOfLines={1}
+                    >
+                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                      - - - - - - - - - - - - - - - - - - - - - - - - -
+                    </Text>
+                    <Item
+                      title={"Hours"}
+                      value={
+                        dayjs(item?.startTime).format("HH:mm") +
+                        " - " +
+                        dayjs(item?.endTime).format("HH:mm")
+                      }
+                    />
+
+                    <Item
+                      title={"Amount"}
+                      value={CurrencyHelper.formatVND(item.total)}
+                    />
+                  </>
+                )}
+              ></FlatList>
               <Text style={styles.dash} ellipsizeMode="clip" numberOfLines={1}>
                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 - - - - - - - - - - - - - - - - - - - - - -
               </Text>
               <Item
                 title={"Total"}
-                value={CurrencyHelper.formatVND(reservation?.timeFrame?.cost)}
+                value={CurrencyHelper.formatVND(
+                  reservation?.timeFrame?.cost +
+                    (reservation.ticketExtend
+                      ? reservation.ticketExtend.reduce(
+                          (t, v) => t + Number(v.total),
+                          0,
+                        )
+                      : 0),
+                )}
               />
             </View>
             <View
