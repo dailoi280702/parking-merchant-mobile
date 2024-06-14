@@ -17,6 +17,7 @@ type ParkingLot = {
   startTime: Date;
   endTime: Date;
   companyId: string;
+  companyID: string;
 };
 
 type Vehicle = {
