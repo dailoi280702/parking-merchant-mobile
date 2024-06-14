@@ -98,6 +98,7 @@ const ParkingReservationDetail = (props: Props) => {
 
         const data = res.data;
         setReservation(data);
+        console.log(userState.companyID);
         if (data.state == "completed" || data.state == "cancel") {
           Alert.alert("QR code expired!");
           Spinner.hide();
@@ -188,9 +189,9 @@ const ParkingReservationDetail = (props: Props) => {
                     (reservation.ticketExtend
                       ? reservation.ticketExtend.reduce(
                           (t, v) => t + Number(v.total),
-                          0,
+                          0
                         )
-                      : 0),
+                      : 0)
                 )}
               />
             </View>
@@ -209,14 +210,14 @@ const ParkingReservationDetail = (props: Props) => {
               </View>
             </View>
           </ScrollView>
-          {userState.companyID == reservation.parkingLot.id && (
+          {userState.companyID == reservation.parkingLot.companyID && (
             <AppButton style={styles.continueButton} onPress={procedure}>
               <Text style={styles.countinueText}>
                 {reservation?.state == "new"
                   ? "Check in"
                   : reservation?.state == "ongoing"
-                    ? "Check out"
-                    : ""}
+                  ? "Check out"
+                  : ""}
               </Text>
             </AppButton>
           )}
