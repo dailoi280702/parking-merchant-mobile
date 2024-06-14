@@ -13,6 +13,8 @@ import { Spinner } from "@nghinv/react-native-loading";
 import { Images } from "@src/assets";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList } from "react-native-gesture-handler";
+import { useAppSelector } from "@src/store/hooks";
+import { selectUser } from "@src/store/selectors";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -31,6 +33,7 @@ const Item = ({ title, value }: { title: string; value: string }) => {
 const ParkingReservationDetail = (props: Props) => {
   const [reservation, setReservation] = useState<Ticket>(null);
   const routeData = props.route.params;
+  const userState = useAppSelector(selectUser);
 
   const checkOut = async (idTicket: string) => {
     try {
@@ -206,15 +209,17 @@ const ParkingReservationDetail = (props: Props) => {
               </View>
             </View>
           </ScrollView>
-          <AppButton style={styles.continueButton} onPress={procedure}>
-            <Text style={styles.countinueText}>
-              {reservation?.state == "new"
-                ? "Check in"
-                : reservation?.state == "ongoing"
-                  ? "Check out"
-                  : ""}
-            </Text>
-          </AppButton>
+          {userState.companyID == reservation.parkingLot.id && (
+            <AppButton style={styles.continueButton} onPress={procedure}>
+              <Text style={styles.countinueText}>
+                {reservation?.state == "new"
+                  ? "Check in"
+                  : reservation?.state == "ongoing"
+                    ? "Check out"
+                    : ""}
+              </Text>
+            </AppButton>
+          )}
         </SafeAreaView>
       )}
     </>
